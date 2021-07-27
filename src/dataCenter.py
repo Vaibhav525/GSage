@@ -23,6 +23,44 @@ class DataCenter(object):
 	"""
 
 	def load_dataSet(self, dataSet='cora'):
+		if dataSet=='DualLJ':
+			DualLJ = self.config['file_path.DualLJ']
+			G :nx.Graph=nx.read_graphml(DualLJ)
+			Bin_type_label=[[1,0,0],[0,1,0],[1,0,0]]	#Type 2=[1,0,0] ,3=[0,1,0],4=[0,0,1]
+			feat_data = []
+			labels = [] # label sequence of node
+			node_map = {} # map node to Node_ID
+			label_map = {} # map label to Label_ID
+			i=0
+			for node in G:
+				features=list(G.nodes[node].values())
+				feat_data.append(Bin_type_label[features[0]-2]+[float(x) for x in features[1:]])
+				node_map[node] = i
+				if not features[0] in label_map:
+					label_map[features[0]] = len(label_map)
+				labels.append(label_map[features[0]])
+				i+=1
+			feat_data = np.asarray(feat_data)
+			labels = np.asarray(labels, dtype=np.int64)
+			adj_lists = defaultdict(set)
+			for edge in G.edges:
+				e1=node_map[edge[0]]
+				e2=node_map[edge[1]]
+				adj_lists[e1].add(e2)
+				adj_lists[e2].add(e1)
+			
+
+			assert len(feat_data) == len(labels) == len(adj_lists)
+			test_indexs, val_indexs, train_indexs = self._split_data(feat_data.shape[0],2*feat_data.shape[0],2*feat_data.shape[0])
+			
+			setattr(self, dataSet+'_test', test_indexs)
+			setattr(self, dataSet+'_val', val_indexs)
+			setattr(self, dataSet+'_train', train_indexs)
+
+			setattr(self, dataSet+'_feats', feat_data)
+			setattr(self, dataSet+'_labels', labels)
+			setattr(self, dataSet+'_adj_lists', adj_lists)
+		
 		if dataSet=='NormLJ':
 			NormLJ = self.config['file_path.NormLJ']
 			G :nx.Graph=nx.read_graphml(NormLJ)
@@ -44,8 +82,11 @@ class DataCenter(object):
 			labels = np.asarray(labels, dtype=np.int64)
 			adj_lists = defaultdict(set)
 			for edge in G.edges:
-				adj_lists[int(edge[0])-1].add(int(edge[1])-1)
-				adj_lists[int(edge[1])-1].add(int(edge[0])-1)
+				e1=node_map[edge[0]]
+				e2=node_map[edge[1]]
+				adj_lists[e1].add(e2)
+				adj_lists[e2].add(e1)
+				
 
 			assert len(feat_data) == len(labels) == len(adj_lists)
 			test_indexs, val_indexs, train_indexs = self._split_data(feat_data.shape[0],2*feat_data.shape[0],2*feat_data.shape[0])

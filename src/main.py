@@ -50,7 +50,7 @@ if __name__ == '__main__':
 	dataCenter = DataCenter(config)
 	dataCenter.load_dataSet(ds)
 	features = torch.FloatTensor(getattr(dataCenter, ds+'_feats')).to(device)
-
+	
 	graphSage = GraphSage(config['setting.num_layers'], features.size(1), config['setting.hidden_emb_size'], features, getattr(dataCenter, ds+'_adj_lists'), device, gcn=args.gcn, agg_func=args.agg_func)
 	graphSage.to(device)
 
@@ -70,7 +70,7 @@ if __name__ == '__main__':
 	for epoch in range(args.epochs):
 		print('----------------------EPOCH %d-----------------------' % epoch)
 		graphSage, classification = apply_model(dataCenter, ds, graphSage, classification, unsupervised_loss, args.b_sz, args.unsup_loss, device, args.learn_method)
-		if (epoch+1) % 2 == 0 and args.learn_method == 'unsup':
-			classification, args.max_vali_f1 = train_classification(dataCenter, graphSage, classification, ds, device, args.max_vali_f1, args.name)
+		#if (epoch+1) % 2 == 0 and args.learn_method == 'unsup':
+		#	classification, args.max_vali_f1 = train_classification(dataCenter, graphSage, classification, ds, device, args.max_vali_f1, args.name)
 		if args.learn_method != 'unsup':
 			args.max_vali_f1 = evaluate(dataCenter, ds, graphSage, classification, device, args.max_vali_f1, args.name, epoch)

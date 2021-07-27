@@ -168,13 +168,13 @@ class UnsupervisedLoss(object):
 
 	def _run_random_walks(self, nodes):
 		for node in nodes:
-			if len(self.adj_lists[int(node)]) == 0:
+			if len(self.adj_lists[node]) == 0:
 				continue
 			cur_pairs = []
 			for i in range(self.N_WALKS):
 				curr_node = node
 				for j in range(self.WALK_LEN):
-					neighs = self.adj_lists[int(curr_node)]
+					neighs = self.adj_lists[curr_node]
 					next_node = random.choice(list(neighs))
 					# self co-occurrences are useless
 					if next_node != node and next_node in self.train_nodes:
