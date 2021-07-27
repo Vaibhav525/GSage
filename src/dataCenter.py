@@ -73,7 +73,7 @@ class DataCenter(object):
 			for node in G:
 				features=list(G.nodes[node].values())
 				feat_data.append(Bin_type_label[features[0]-1]+[float(x) for x in features[1:]])
-				node_map[int(node)-1] = i
+				node_map[node] = i
 				if not features[0] in label_map:
 					label_map[features[0]] = len(label_map)
 				labels.append(label_map[features[0]])
